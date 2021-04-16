@@ -59,8 +59,6 @@ class MulticlassLR():
 
                 curr_sample_size = len(X_batch)
 
-                # update coeffs
-                # theta -= (1/curr_sample_size)*curr_lr*np.matmul(X_batch.T, error_batch)
                 probab = self.hypothesis(X_batch, theta)
                 theta -= (1/curr_sample_size)*curr_lr*(X_batch.T @ (probab - self.indicator(y_batch)))
 

@@ -32,7 +32,7 @@ def cross_validation(k, df):
         # LR = LogisticRegression(bias=True)
 
         # LR.fit_2class_unreg(x_train, y_train, 10)
-        LR.fit_2class_autograd(x_train, y_train, 10, reg_type='L1', lam=10)
+        LR.fit_2class_autograd(x_train, y_train, 10, reg_type="L2", lam=10)
 
         y_hat = pd.Series(np.array(LR.predict_2class(x_test)))
 

@@ -71,9 +71,11 @@ class LogisticRegression():
         y_hat = anp_sigmoid(anp.matmul(X,theta))
         cost = -1 * (anp.dot(y.T, anp.log(y_hat)) + anp.dot((1 - y).T, anp.log(1 - y_hat)))
         if reg_type == 'L1':
-            cost += lam * anp.linalg.norm(theta, ord=1)
+            # cost += lam * anp.linalg.norm(theta, ord=1)
+            cost += lam * anp.sum(abs(theta))
         elif reg_type == 'L2':
-            cost += lam * anp.linalg.norm(theta, ord=2)
+            # cost += lam * anp.linalg.norm(theta, ord=2)
+            cost += lam * anp.dot(theta.reshape(-1), theta.reshape(-1).T)
         return cost        
 
     def fit_2class_autograd(self, X, y, batch_size, n_iter=100, lr=0.01, reg_type=None, lam=0):
