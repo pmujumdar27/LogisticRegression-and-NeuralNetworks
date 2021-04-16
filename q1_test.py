@@ -32,7 +32,7 @@ def cross_validation(k, df):
         # LR = LogisticRegression(bias=True)
 
         # LR.fit_2class_unreg(x_train, y_train, 10)
-        LR.fit_2class_autograd(x_train, y_train, 10)
+        LR.fit_2class_autograd(x_train, y_train, 10, reg_type='L1', lam=10)
 
         y_hat = pd.Series(np.array(LR.predict_2class(x_test)))
 
@@ -62,26 +62,26 @@ y = pd.Series(data['target'])
 data_arr = normalized.fit_transform(data_arr)
 df = pd.DataFrame(data_arr, columns=data['feature_names'])
 
-LR = LogisticRegression()
+# LR = LogisticRegression()
 
-LR.fit_2class_autograd(df, y, 10, reg_type="L2", lam=10)
+# LR.fit_2class_autograd(df, y, 10, reg_type="L2", lam=10)
 
-y_hat = LR.predict_2class(df)
+# y_hat = LR.predict_2class(df)
 
-print("Accuracy: ", accuracy(y_hat, y))
+# print("Accuracy: ", accuracy(y_hat, y))
 
 
 
-# X_db = df[[df.columns[0], df.columns[1]]]
-# df['target'] = data['target']
+X_db = df[[df.columns[0], df.columns[1]]]
+df['target'] = data['target']
 
-# print('--------------------------------------------------')
+print('--------------------------------------------------')
 
-# _, best_accuracy = cross_validation(3, df)
-# print("Accuracy: ", best_accuracy)
+_, best_accuracy = cross_validation(3, df)
+print("Accuracy: ", best_accuracy)
 
-# print('--------------------------------------------------')
+print('--------------------------------------------------')
 
-# y_db = df['target']
+y_db = df['target']
 
-# plot_db_test(X_db, y_db)
+plot_db_test(X_db, y_db)

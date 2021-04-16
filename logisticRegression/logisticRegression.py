@@ -67,23 +67,14 @@ class LogisticRegression():
             self.bias = b
 
 
-    def anp_loss(self, X, y, theta):
+    def anp_loss(self, X, y, theta, reg_type, lam):
         y_hat = anp_sigmoid(anp.matmul(X,theta))
-        cost = y*anp.log(anp_sigmoid(y_hat)) + (1-y)*anp.log(1-anp_sigmoid(y_hat))
-        return -anp.sum(cost)/len(X)
-
-    def anp_l1_loss(self, X, y, theta, lam):
-        y_hat = anp_sigmoid(anp.matmul(X,theta))
-        cost = y*anp.log(anp_sigmoid(y_hat)) + (1-y)*anp.log(1-anp_sigmoid(y_hat))
-
-        return (lam*anp.absolute(theta))/len(X) - anp.sum(cost)/len(X)
-
-    def anp_l2_loss(self, X, y, theta, lam):
-        y_hat = anp_sigmoid(anp.matmul(X,theta))
-        cost = y*anp.log(anp_sigmoid(y_hat)) + (1-y)*anp.log(1-anp_sigmoid(y_hat))
-
-        return lam*anp.dot(theta, theta.T)/len(X) - anp.sum(cost)/len(X)
-        
+        cost = -1 * (anp.dot(y.T, anp.log(y_hat)) + anp.dot((1 - y).T, anp.log(1 - y_hat)))
+        if reg_type == 'L1':
+            cost += lam * anp.linalg.norm(theta, ord=1)
+        elif reg_type == 'L2':
+            cost += lam * anp.linalg.norm(theta, ord=2)
+        return cost        
 
     def fit_2class_autograd(self, X, y, batch_size, n_iter=100, lr=0.01, reg_type=None, lam=0):
         '''
@@ -107,12 +98,12 @@ class LogisticRegression():
         theta = self.coef_
         curr_lr = lr
 
-        if reg_type is None:
-            loss_grad = grad(self.anp_loss, argnum=2)
-        elif reg_type == 'L1':
-            loss_grad = grad(self.anp_l1_loss, argnum=2)
-        elif reg_type == "L2":
-            loss_grad = grad(self.anp_l2_loss, argnum=2)
+        # if reg_type is None:
+        loss_grad = grad(self.anp_loss, argnum=2)
+        # elif reg_type == 'L1':
+        #     loss_grad = grad(self.anp_l1_loss, argnum=2)
+        # elif reg_type == "L2":
+        #     loss_grad = grad(self.anp_l2_loss, argnum=2)
 
         for iter in range(1, n_iter+1):
             # print(theta)
@@ -127,7 +118,7 @@ class LogisticRegression():
                 # error_batch = y_hat_batch - y_batch
 
                 # update coeffs
-                theta -= (1/curr_sample_size)*curr_lr*loss_grad(X_batch, y_batch, theta, lam)
+                theta -= (1/curr_sample_size)*curr_lr*loss_grad(X_batch, y_batch, theta, reg_type, lam)
 
         self.coef_ = theta
 
