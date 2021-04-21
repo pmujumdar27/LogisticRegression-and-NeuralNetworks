@@ -9,12 +9,6 @@ class NN():
     def __init__(self, n_features, n_hidden, n_neurons, activations, num_classes=None, last_activ=None):
         '''
         '''
-        # o = np.ones(n)
-        # X = np.concatenate((o.reshape(-1,1), X), axis=1)
-        # self.X = np.concatenate((np.ones(X.shape[0]).reshape(-1,1), X), axis=1)
-        # self.X = X
-        # self.y = y
-        # self.n_samples = self.X.shape[0]
         self.n_features = n_features
         self.n_hidden = n_hidden
         self.n_neurons = n_neurons
@@ -23,7 +17,7 @@ class NN():
         self.last_activ = last_activ
         self.weights = []
 
-        assert(self.n_hidden == len(n_neurons) == len(activations))
+        assert(self.n_hidden == len(n_neurons))
 
         self.init_params()
 
@@ -152,32 +146,3 @@ class NN():
             return y_hat.reshape(-1)
         else:
             return np.argmax(y_hat, axis=1)
-        # return y_hat
-
-'''
-X = np.random.randn(10, 5)
-y = np.array([np.random.randint(4) for i in range(10)])
-print(X.shape)
-print(y.shape)
-
-n_hidden = 3
-n_neurons = [3,4,2]
-n_features = 5
-activations = ['relu', 'relu', 'relu']
-num_classes = 4
-last_activ = None
-
-nn = NN(n_features, n_hidden, n_neurons, activations, None, None)
-# nn = NN(n_features, n_hidden, n_neurons, activations, 5, 'softmax')
-
-tmp = nn.forward_pass(X, nn.weights)
-# print(tmp)
-print(nn.softmax(tmp))
-
-print("Loss: ")
-print(nn.loss(nn.weights, X, y))
-
-nn.fit(X, y, 10, n_iter=1000)
-y_hat = nn.predict(X)
-print(y_hat)
-'''
