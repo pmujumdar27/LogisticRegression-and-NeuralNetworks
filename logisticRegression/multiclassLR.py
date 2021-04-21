@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from .utils import *
 
@@ -12,12 +13,28 @@ class MulticlassLR():
         self.coef_ = None
         self.num_classes = num_classes
         self.theta_history = []
+        self.loss_history = []
+
+    def softmax_vec(self, z):
+        tmp = z-max(z)
+        return np.exp(tmp)/np.sum(np.exp(tmp))
 
     def softmax(self, z):
-        z -= np.max(z) #regularization, if we don't do this, overflow might happen (almost always happens)
-        return np.exp(z) / np.sum(np.exp(z))
+        tmp = z
+        for i in range(z.shape[0]):
+            tmp[i]-=max(tmp[i])
+            tmp[i] = np.exp(tmp[i])
+            tmp[i]/=tmp[i].sum()
+        return tmp
 
-    def hypothesis(self, X, theta):
+    def anp_hypothesis(self, X, theta):
+        hyp = anp.exp(anp.dot(np.array(X), theta))
+        den = anp.sum(hyp, axis=1).reshape(-1,1)
+        return hyp/den
+
+    def hypothesis(self, X, theta, single=False):
+        if single:
+            return self.softmax_vec(X @ theta)
         return self.softmax(X @ theta)
 
     def indicator(self, y):
@@ -28,6 +45,26 @@ class MulticlassLR():
 
         return ind
 
+    def xentropy_loss(self, X, y, theta):
+
+        hyp = self.hypothesis(X, theta)
+        loss = 0
+        for i in range(X.shape[0]):
+            for j in range(self.num_classes):
+                loss -= (y[i]==j)*np.log(hyp[i][j])
+
+        return loss
+
+
+    def anp_xentropy_loss(self, X, y, theta):
+        hyp = self.anp_hypothesis(X, theta)
+        loss = 0
+        for i in range(X.shape[0]):
+            for j in range(self.num_classes):
+                loss -= (y[i]==j)*anp.log(hyp[i][j])
+
+        return loss
+
     def fit(self, X, y, batch_size, n_iter=100, lr=0.01):
         n, m = X.shape
 
@@ -37,23 +74,15 @@ class MulticlassLR():
         theta = self.coef_
         curr_lr = lr
 
-        for iter in range(1, n_iter+1):
-            # y_hat = self.hypothesis(X_new, theta)
-            
-            # loss = 0
+        for iter in tqdm(range(1, n_iter+1)):
 
-            # for i in range(n):
-            #     for k in range(self.num_classes):
-            #         indicator_tmp = 0
-            #         if y[i]==k:
-            #             indicator_tmp = 1
-            #         loss += -1 * indicator_tmp * np.log(y_hat.iloc[i][k])
+            if iter%10 == 0:
+                loss = self.xentropy_loss(np.array(X_new), np.array(y), theta)
+                print("Iteration: {}, Loss: {}".format(iter, loss))
+                self.loss_history.append(loss)
+                self.theta_history.append(theta.copy())
 
-            # print("Iteration: {}, Loss: {}".format(iter, loss))
-
-            self.theta_history.append(theta.copy())
-
-            for batch in range(0, m, batch_size):
+            for batch in range(0, n, batch_size):
                 X_batch = np.array(X_new.iloc[batch:batch+batch_size])
                 y_batch = np.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
 
@@ -61,6 +90,36 @@ class MulticlassLR():
 
                 probab = self.hypothesis(X_batch, theta)
                 theta -= (1/curr_sample_size)*curr_lr*(X_batch.T @ (probab - self.indicator(y_batch)))
+
+                self.coef_ = theta
+
+    def fit_autograd(self, X, y, batch_size, n_iter=100, lr=0.01):
+        n, m = X.shape
+
+        X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
+
+        self.coef_ = anp.zeros((m+1,self.num_classes))
+        theta = self.coef_
+        curr_lr = lr
+
+        loss_grad = grad(self.anp_xentropy_loss, argnum=2)
+
+        for iter in tqdm(range(1, n_iter+1)):
+
+            if iter%10 == 0:
+                loss = self.xentropy_loss(np.array(X_new), np.array(y), theta)
+                print("Iteration: {}, Loss: {}".format(iter, loss))
+                self.loss_history.append(loss)
+                self.theta_history.append(theta.copy())
+
+            for batch in range(0, n, batch_size):
+                X_batch = np.array(X_new.iloc[batch:batch+batch_size])
+                y_batch = np.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
+
+                curr_sample_size = len(X_batch)
+
+                probab = self.hypothesis(X_batch, theta)
+                theta -= (1/curr_sample_size)*curr_lr*loss_grad(X_batch, y_batch, theta)
 
         self.coef_ = theta
 
@@ -72,7 +131,13 @@ class MulticlassLR():
         preds = []
 
         for sample in range(X_new.shape[0]):
-            pred = self.hypothesis(X_new.iloc[sample], self.coef_)
+            pred = self.hypothesis(X_new.iloc[sample], self.coef_, single=True)
             preds.append(np.argmax(pred))
 
         return pd.Series(preds)
+
+    def plot_loss_history(self):
+        plt.plot([10*i for i in range(1, len(self.loss_history)+1)], self.loss_history)
+        plt.xlabel("Iterations")
+        plt.ylabel("Crossentropy Loss")
+        plt.show()

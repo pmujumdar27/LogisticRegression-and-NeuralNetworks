@@ -7,10 +7,14 @@ from logisticRegression.multiclassLR import MulticlassLR
 from metrics import *
 
 from sklearn.datasets import load_digits
+from sklearn.preprocessing import MinMaxScaler
+
+normalized = MinMaxScaler(feature_range=(-1,1))
 
 digits_dataset = load_digits()
 
 data = digits_dataset['data']
+data = normalized.fit_transform(data)
 target = digits_dataset['target']
 
 df = pd.DataFrame(data, columns=digits_dataset['feature_names'])
@@ -23,7 +27,9 @@ num_classes = len(digits_dataset['target_names'])
 
 MLR = MulticlassLR(num_classes)
 
-MLR.fit(X, y, 10)
+# MLR.fit(X, y, 10, n_iter=50, lr=0.1)
+MLR.fit_autograd(X, y, 10, n_iter=50, lr=0.1)
+MLR.plot_loss_history()
 
 y_hat = MLR.predict(X)
 
