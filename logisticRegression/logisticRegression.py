@@ -8,14 +8,14 @@ import autograd.numpy as anp
 from autograd import grad
 
 class LogisticRegression():
-    def __init__(self, bias=False):
+    def __init__(self):
         self.coef_ = None
-        self.use_bias = bias
-        self.bias = None
+        # self.use_bias = bias
+        # self.bias = None
         
         self.theta_history = []
 
-    def fit_2class_unreg(self, X, y,batch_size, n_iter=100, lr=0.01):
+    def fit_2class_unreg(self, X, y, batch_size, n_iter=100, lr=0.01):
         '''
         Function to train model using vectorised gradient descent.
 
@@ -29,6 +29,14 @@ class LogisticRegression():
 
         :return None
         '''
+        # X = X.reset_index(drop=True)
+        # y = y.reset_index(drop=True)
+        n,m = X.shape
+        X = np.array(X)
+        y = np.array(y)
+        o = np.ones(n)
+        X = np.concatenate((o.reshape(-1,1), X), axis=1)
+        # X = pd.concat([pd.Series(np.ones(n)),X],axis=1)
 
         num_samples = X.shape[0]
         
@@ -38,18 +46,14 @@ class LogisticRegression():
         theta = self.coef_
         curr_lr = lr
 
-        if self.use_bias:
-            self.bias = 0
-            b = self.bias
-
         for iter in range(1, n_iter+1):
             # print("Iteration: {}".format(iter), theta)
 
             self.theta_history.append(theta.copy())
 
             for batch in range(0, num_samples, batch_size):
-                X_batch = np.array(X.iloc[batch:batch+batch_size])
-                y_batch = np.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
+                X_batch = np.array(X[batch:batch+batch_size])
+                y_batch = np.array(y[batch:batch+batch_size]).reshape((len(X_batch), 1))
 
                 curr_sample_size = len(X_batch)
 
@@ -58,13 +62,13 @@ class LogisticRegression():
 
                 # update coeffs
                 theta -= (1/curr_sample_size)*curr_lr*np.matmul(X_batch.T, error_batch)
-                if self.use_bias:
-                    b -= (1/curr_sample_size)*curr_lr*np.sum(error_batch)
+                # if self.use_bias:
+                #     b -= (1/curr_sample_size)*curr_lr*np.sum(error_batch)
                 
 
         self.coef_ = theta
-        if self.use_bias:
-            self.bias = b
+        # if self.use_bias:
+        #     self.bias = b
 
 
     def anp_loss(self, X, y, theta, reg_type, lam):
@@ -92,6 +96,12 @@ class LogisticRegression():
         :return None
         '''
 
+        n, m = X.shape
+        X = np.array(X)
+        y = np.array(y)
+        o = np.ones(n)
+        X = np.concatenate((o.reshape(-1,1), X), axis=1)
+
         num_samples = X.shape[0]
         
         num_features = X.shape[1]
@@ -100,24 +110,18 @@ class LogisticRegression():
         theta = self.coef_
         curr_lr = lr
 
-        # if reg_type is None:
         loss_grad = grad(self.anp_loss, argnum=2)
-        # elif reg_type == 'L1':
-        #     loss_grad = grad(self.anp_l1_loss, argnum=2)
-        # elif reg_type == "L2":
-        #     loss_grad = grad(self.anp_l2_loss, argnum=2)
 
         for iter in range(1, n_iter+1):
             # print(theta)
 
             for batch in range(0, num_samples, batch_size):
-                X_batch = anp.array(X.iloc[batch:batch+batch_size])
-                y_batch = anp.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
+                X_batch = anp.array(X[batch:batch+batch_size])
+                y_batch = anp.array(y[batch:batch+batch_size]).reshape((len(X_batch), 1))
 
                 curr_sample_size = len(X_batch)
 
                 y_hat_batch = anp.matmul(X_batch, theta)
-                # error_batch = y_hat_batch - y_batch
 
                 # update coeffs
                 theta -= (1/curr_sample_size)*curr_lr*loss_grad(X_batch, y_batch, theta, reg_type, lam)
@@ -134,13 +138,12 @@ class LogisticRegression():
         :return: y: pd.Series with rows corresponding to output variable. The output variable in a row is the prediction for sample in corresponding row in X.
         '''
 
-        X_dash = X
+        n,_ = X.shape
+        X = np.array(X)
+        o = np.ones(n)
+        X_dash = np.concatenate((o.reshape(-1,1), X), axis=1)
 
-        bias = self.bias
-        if bias is None:
-            bias = 0
-
-        pred = sigmoid(np.dot(X_dash, self.coef_)+bias)
+        pred = sigmoid(np.dot(X_dash, self.coef_))
 
         return pd.Series([1 if i > 0.5 else 0 for i in pred])
 

@@ -68,23 +68,36 @@ class MulticlassLR():
     def fit(self, X, y, batch_size, n_iter=100, lr=0.01):
         n, m = X.shape
 
-        X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
+        # X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
 
-        self.coef_ = np.zeros((m+1,self.num_classes))
+        # self.coef_ = np.zeros((m+1,self.num_classes))
+
+        n,m = X.shape
+        X = np.array(X)
+        y = np.array(y)
+        o = np.ones(n)
+        X = np.concatenate((o.reshape(-1,1), X), axis=1)
+
+        num_samples = X.shape[0]
+        
+        num_features = X.shape[1]
+
+        self.coef_ = np.zeros((num_features,self.num_classes))
+
         theta = self.coef_
         curr_lr = lr
 
         for iter in tqdm(range(1, n_iter+1)):
 
             if iter%10 == 0:
-                loss = self.xentropy_loss(np.array(X_new), np.array(y), theta)
+                loss = self.xentropy_loss(np.array(X), np.array(y), theta)
                 print("Iteration: {}, Loss: {}".format(iter, loss))
                 self.loss_history.append(loss)
                 self.theta_history.append(theta.copy())
 
             for batch in range(0, n, batch_size):
-                X_batch = np.array(X_new.iloc[batch:batch+batch_size])
-                y_batch = np.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
+                X_batch = np.array(X[batch:batch+batch_size])
+                y_batch = np.array(y[batch:batch+batch_size]).reshape((len(X_batch), 1))
 
                 curr_sample_size = len(X_batch)
 
@@ -124,17 +137,23 @@ class MulticlassLR():
         self.coef_ = theta
 
     def predict(self, X):
-        X_new = pd.concat([pd.Series(np.ones(X.shape[0])),X],axis=1)
+        # X_new = pd.concat([pd.Series(np.ones(X.shape[0])),X],axis=1)
+
+        n,m = X.shape
+        X = np.array(X)
+        # y = np.array(y)
+        o = np.ones(n)
+        X_new = np.concatenate((o.reshape(-1,1), X), axis=1)
 
         # pred = self.hypothesis(X_new, self.coef_)
 
         preds = []
 
         for sample in range(X_new.shape[0]):
-            pred = self.hypothesis(X_new.iloc[sample], self.coef_, single=True)
+            pred = self.hypothesis(X_new[sample], self.coef_, single=True)
             preds.append(np.argmax(pred))
 
-        return pd.Series(preds)
+        return np.array(preds)
 
     def plot_loss_history(self):
         plt.plot([10*i for i in range(1, len(self.loss_history)+1)], self.loss_history)

@@ -28,13 +28,13 @@ def cross_validation(k, df):
         x_test = test.drop(['target'], axis=1)
         y_test = test['target']
 
-        LR = LogisticRegression(bias=False)
+        LR = LogisticRegression()
         # LR = LogisticRegression(bias=True)
 
-        # LR.fit_2class_unreg(x_train, y_train, 10)
-        LR.fit_2class_autograd(x_train, y_train, 10, reg_type="L2", lam=10)
+        # LR.fit_2class_unreg(x_train, y_train, 10, n_iter=200)
+        LR.fit_2class_autograd(x_train, y_train, 10, n_iter = 200, reg_type=None)
 
-        y_hat = pd.Series(np.array(LR.predict_2class(x_test)))
+        y_hat = np.array(LR.predict_2class(x_test))
 
         acc = accuracy(y_hat, pd.Series(np.array(y_test)))
         if(acc > best_acc):
@@ -45,7 +45,7 @@ def cross_validation(k, df):
 
 def plot_db_test(X, y):
     LR = LogisticRegression()
-    LR.fit_2class_unreg(X, y, 10)
+    LR.fit_2class_unreg(X, y, 10, n_iter=200)
 
     print("Plotting decision boundary")
     fig = LR.plot_2d_boundary(X, y)
@@ -62,16 +62,6 @@ y = pd.Series(data['target'])
 data_arr = normalized.fit_transform(data_arr)
 df = pd.DataFrame(data_arr, columns=data['feature_names'])
 
-# LR = LogisticRegression()
-
-# LR.fit_2class_autograd(df, y, 10, reg_type="L2", lam=10)
-
-# y_hat = LR.predict_2class(df)
-
-# print("Accuracy: ", accuracy(y_hat, y))
-
-
-
 X_db = df[[df.columns[0], df.columns[1]]]
 df['target'] = data['target']
 
@@ -84,4 +74,4 @@ print('--------------------------------------------------')
 
 y_db = df['target']
 
-plot_db_test(X_db, y_db)
+plot_db_test(pd.DataFrame(X_db), y_db)
