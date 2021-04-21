@@ -64,19 +64,19 @@ def recall(y_hat, y, cls):
     assert(tot>0)
     return cnt.sum()/tot
 
-# def rmse(y_hat, y):
-#     """
-#     Function to calculate the root-mean-squared-error(rmse)
+def rmse(y_hat, y):
+    """
+    Function to calculate the root-mean-squared-error(rmse)
 
-#     Inputs:
-#     > y_hat: pd.Series of predictions
-#     > y: pd.Series of ground truth
-#     Output:
-#     > Returns the rmse as float
-#     """
-#     assert(y_hat.size == y.size)
-#     assert(y.size>0)
-#     return np.sqrt(((y_hat-y)**2).sum()/y.size)
+    Inputs:
+    > y_hat: pd.Series of predictions
+    > y: pd.Series of ground truth
+    Output:
+    > Returns the rmse as float
+    """
+    assert(y_hat.size == y.size)
+    assert(y.size>0)
+    return np.sqrt(((y_hat-y)**2).sum()/y.size)
 
 # def mae(y_hat, y):
 #     """
