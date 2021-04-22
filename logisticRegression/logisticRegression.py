@@ -9,34 +9,17 @@ from autograd import grad
 
 class LogisticRegression():
     def __init__(self):
-        self.coef_ = None
-        # self.use_bias = bias
-        # self.bias = None
-        
+        self.coef_ =        None
         self.theta_history = []
 
     def fit_2class_unreg(self, X, y, batch_size, n_iter=100, lr=0.01):
         '''
-        Function to train model using vectorised gradient descent.
-
-        :param X: pd.DataFrame with rows as samples and columns as features (shape: (n_samples, n_features))
-        :param y: pd.Series with rows corresponding to output (shape: (n_samples,))
-        :param batch_size: int specifying the batch size. Batch size can only be between 1 and number of samples in data.
-        :param n_iter: number of iterations (default: 100)
-        :param lr: learning rate (default: 0.01)
-        :param lr_type: If lr_type = 'constant', then the learning rate remains constant,
-                        if lr_type = 'inverse', then learning rate = lr / t, where t = current iteration number
-
-        :return None
         '''
-        # X = X.reset_index(drop=True)
-        # y = y.reset_index(drop=True)
         n,m = X.shape
         X = np.array(X)
         y = np.array(y)
         o = np.ones(n)
         X = np.concatenate((o.reshape(-1,1), X), axis=1)
-        # X = pd.concat([pd.Series(np.ones(n)),X],axis=1)
 
         num_samples = X.shape[0]
         

@@ -20,7 +20,8 @@ def cross_validation(k, df, lam, reg_type):
 	best_accuracy = 0
 	avg_acc = 0
 
-	for fold in tqdm(range(k)):
+	for fold in range(k):
+		print("		Inner Fold: ", fold+1)
 		l_fold = int(fold_size*fold)
 		r_fold = int(fold_size*(fold+1))
 
@@ -52,7 +53,9 @@ def nested_cross_val(k, df, min_lambda, max_lambda, reg_type):
 	best_lr = None
 	best_accuracy = 0
 	final_lambda = None
-	for fold in tqdm(range(k)):
+	for fold in range(k):
+		print('[Logs] Outer fold: ', fold+1)
+
 		l_fold = int(fold_size*fold)
 		r_fold = int(fold_size*(fold+1))
 
@@ -100,6 +103,10 @@ df = pd.DataFrame(data_arr, columns=data['feature_names'])
 df['target'] = data['target']
 
 print('\n------------------Nested Cross Validation------------------')
-best_lambda, best_n_acc, best_n_LR = nested_cross_val(2, df, 1, 4, 'L2')
+best_lambda, best_n_acc, best_n_LR = nested_cross_val(4, df, 1, 4, 'L1')
 print("Best lambda is: ", best_lambda)
 print("The best accuracy is: ", best_n_acc)
+
+# print(best_n_LR.coef_)
+imp_feat_no = np.argmax(abs(best_n_LR.coef_.reshape(-1)))
+print("The most important featue no. is: ", imp_feat_no)

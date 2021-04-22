@@ -11,12 +11,14 @@ from sklearn.datasets import load_digits
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import confusion_matrix
+from sklearn.decomposition import PCA
 
 normalized = MinMaxScaler(feature_range=(-1,1))
 
 digits_dataset = load_digits()
 
 data = digits_dataset['data']
+original_data = data.copy()
 data = normalized.fit_transform(data)
 target = digits_dataset['target']
 
@@ -30,25 +32,13 @@ num_classes = len(digits_dataset['target_names'])
 
 MLR = MulticlassLR(num_classes)
 
-'''
-MLR.fit(X, y, 10, n_iter=50, lr=0.1)
-# MLR.fit_autograd(X, y, 10, n_iter=50, lr=0.1)
-MLR.plot_loss_history()
-
-y_hat = MLR.predict(X)
-
-acc = accuracy(y_hat, y)
-
-print("Accuracy: ", acc)
-
-# print(digits_dataset)
-'''
-
 skf = StratifiedKFold(n_splits=4)
 
 cm_best = None
 best_acc = 0
 cm_tot = np.zeros((10,10))
+
+accs = []
 
 for train_index, test_index in skf.split(X, y):
     # Code taken from official documentation https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
@@ -69,6 +59,8 @@ for train_index, test_index in skf.split(X, y):
     cm_tot += cm
     print("Accuracy: ", acc)
 
+    accs.append(acc)
+
     if acc > best_acc:
         best_acc = acc
         y_test_best = y_test
@@ -77,13 +69,33 @@ for train_index, test_index in skf.split(X, y):
         cm_best = cm
         # cm_best = cm
 
+print()
+print("The accuracies over the folds: ")
+print(accs)
+
 print(cm_best)
 print()
 print("Best accuracy: ", best_acc)
+plt.figure()
 sns.heatmap(cm_best, annot=True)
 plt.title("Confusion matrix visualized")
-plt.show()
+plt.ylabel("True Label")
+plt.xlabel("Predicted Label")
+plt.savefig('./plots/best_confusion_matrix.png')
 
 print(cm_tot)
+plt.figure()
 sns.heatmap(cm_tot, annot=True)
-plt.show()
+plt.title("Cumulative confusion over different folds")
+plt.ylabel("True Label")
+plt.xlabel("Predicted Label")
+# plt.show()
+plt.savefig('./plots/cumulative_confusion_matrix.png')
+
+n_misclassified = cm_tot.sum(axis=1) - np.diagonal(cm_tot)
+
+print()
+
+print("Number of times ith digit was misclassified: ")
+
+print(n_misclassified)

@@ -8,6 +8,13 @@ from autograd import grad
 class NN():
     def __init__(self, n_features, n_hidden, n_neurons, activations, num_classes=None, last_activ=None):
         '''
+        Function to initialize Neural Network
+        n_features: number of input features
+        n_hidden: number of hidden layers
+        n_neurons: list of number of neurons in respective hidden layer
+        activations: list of names of activation functions to be used in respective hidden layers
+        num_classes: number of classes for classification, set None if regression problem
+        last_activ: name of activation function for output layer, set None if regression
         '''
         self.n_features = n_features
         self.n_hidden = n_hidden
@@ -23,6 +30,7 @@ class NN():
 
     def init_params(self):
         '''
+        Function to initialize the weights of different layers in the NN
         '''
         if self.n_hidden > 0:
             first_w = np.random.randn(*(self.n_features+1, self.n_neurons[0]))
@@ -50,18 +58,32 @@ class NN():
         self.weights.append(last_w)
 
     def relu(self, z):
-        return (z > 0).astype(float)
+        '''
+        Relu activation function
+        '''
+        # z[z<0] = 0
+
+        return (z>0).astype(float) * z
 
     def sigmoid(self, z):
+        '''
+        Sigmoid activation function
+        '''
         return 1 / np.exp(-z)
 
     def softmax(self, z):
+        '''
+        Softmax activation function
+        '''
         z -= np.max( z, axis=1, keepdims=True)
         tmp = np.exp(z)
         return tmp / np.sum(tmp, axis=1, keepdims=True)
 
     def forward_pass(self, X, weights):
         '''
+        Function to execute one forward pass of the neural network 
+        X: numpy array of input samples
+        weights: list of weights of each layer
         '''
         z = X
         
@@ -85,6 +107,9 @@ class NN():
         return z
 
     def indicator(self, y, y_hat):
+        '''
+        Indicator function (one hot encoding)
+        '''
         ind = np.zeros(y_hat.shape)
 
         for sample in range(len(y)):
@@ -94,6 +119,10 @@ class NN():
 
     def loss(self, weights, X, y):
         '''
+        Function to calculate loss in the Neural Network
+        weights: List of weights of respective layers
+        X: numpy array of input samples
+        y: numpy array of labels
         '''
         y_hat = self.forward_pass(X, weights) + 1e-8
         if self.last_activ is None:
@@ -108,6 +137,12 @@ class NN():
 
     def fit(self, X, y, batch_size, n_iter=100, lr=0.01):
         '''
+        Function to fit data using batched gradient descent
+        X: numpy array of input samples
+        y: numpy array of input labels
+        batch_size: batch size to be used during gradient descent
+        n_iter: number of iterations
+        lr: learning rate for gradient descent
         '''
         self.X = X
         self.y = y
@@ -140,6 +175,8 @@ class NN():
 
     def predict(self, X):
         '''
+        Function to predict the output of Neural Network
+        X: numpy array of input samples
         '''
         y_hat = self.forward_pass(X, self.weights)
         if self.num_classes is None:

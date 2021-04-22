@@ -14,6 +14,7 @@ def cross_validation(k, df):
     print('{} fold cross validation:'.format(k))
     fold_size = len(df)/k
     best_lr = None
+    accs = []
     best_acc = 0
 
     for fold in tqdm(range(k)):
@@ -29,7 +30,6 @@ def cross_validation(k, df):
         y_test = test['target']
 
         LR = LogisticRegression()
-        # LR = LogisticRegression(bias=True)
 
         # LR.fit_2class_unreg(x_train, y_train, 10, n_iter=200)
         LR.fit_2class_autograd(x_train, y_train, 10, n_iter = 200, reg_type=None)
@@ -37,11 +37,12 @@ def cross_validation(k, df):
         y_hat = np.array(LR.predict_2class(x_test))
 
         acc = accuracy(y_hat, pd.Series(np.array(y_test)))
+        accs.append(acc)
         if(acc > best_acc):
             best_acc = acc
             best_lr = LR
 
-    return best_lr, best_acc
+    return best_lr, best_acc, accs
 
 def plot_db_test(X, y):
     LR = LogisticRegression()
@@ -67,8 +68,12 @@ df['target'] = data['target']
 
 print('--------------------------------------------------')
 
-_, best_accuracy = cross_validation(3, df)
-print("Accuracy: ", best_accuracy)
+_, best_accuracy, accs = cross_validation(3, df)
+print()
+print("Accuracies: ")
+print(accs)
+print()
+print("Best Accuracy: ", best_accuracy)
 
 print('--------------------------------------------------')
 

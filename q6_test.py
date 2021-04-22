@@ -75,7 +75,7 @@ def test_digits(k):
         best_acc = max(best_acc, acc)
 
     print()
-    print("The accuracies for the {} folds: ", k)
+    print("The accuracies for the {} folds: ".format(k))
     print(accuracies)
     print()
     print("Best accuracy: ", best_acc)
