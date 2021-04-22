@@ -31,7 +31,7 @@ O(n*d*k*n_iter)
 
 For prediction of one sample, we multiply the sample with the weights which is a ```(d+1) x k``` matrix.
 
-So for ```n``` samples, space complexity of prediction is:
+So for ```n``` samples, time complexity of prediction is:
 ```
 O(n*d*k)
 ```
