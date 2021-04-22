@@ -12,6 +12,7 @@
 - Let the number of samples = ```n```
 - Let the number of classes = ```k```
 - Let number of iteratons = ```n_iter```
+- For space complexity analysis, we are not counting space needed by the user to store the samples and results
 
 ---
 
@@ -41,12 +42,12 @@ O(n*d*k)
 
 The space complexity ```k-class Logistic Regression``` for fit is:
 ```
-O(n*(k+d))
+O(k*d) for each sample as the weight are in a (d+1) x k matrix
 ```
 
 The space complexity for predict is:
 ```
-O(n*(k+d))
+O(k*d) for each sample as the weight are in a (d+1) x k matrix
 ```
 
 ---
