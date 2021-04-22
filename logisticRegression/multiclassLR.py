@@ -10,16 +10,26 @@ from autograd import grad
 
 class MulticlassLR():
     def __init__(self, num_classes):
+        '''
+        Function to initialize 
+        num_classes: number of classes
+        '''
         self.coef_ = None
         self.num_classes = num_classes
         self.theta_history = []
         self.loss_history = []
 
     def softmax_vec(self, z):
+        '''
+        softmax for vector
+        '''
         tmp = z-max(z)
         return np.exp(tmp)/np.sum(np.exp(tmp))
 
     def softmax(self, z):
+        '''
+        softmax for matrix
+        '''
         tmp = z
         for i in range(z.shape[0]):
             tmp[i]-=max(tmp[i])
@@ -28,16 +38,25 @@ class MulticlassLR():
         return tmp
 
     def anp_hypothesis(self, X, theta):
+        '''
+        Function for hypothesis
+        '''
         hyp = np.exp(np.dot(np.array(X), theta))
         den = np.sum(hyp, axis=1).reshape(-1,1)
         return hyp/den
 
     def hypothesis(self, X, theta, single=False):
+        '''
+        Function for hypothesis
+        '''
         if single:
             return self.softmax_vec(X @ theta)
         return self.softmax(X @ theta)
 
     def indicator(self, y):
+        '''
+        Function for one hot encoded indicator
+        '''
         ind = np.zeros((len(y), self.num_classes))
 
         for sample in range(len(y)):
@@ -46,6 +65,9 @@ class MulticlassLR():
         return ind
 
     def xentropy_loss(self, X, y, theta):
+        '''
+        Function for crossentropy loss
+        '''
 
         hyp = self.hypothesis(X, theta)
 
@@ -62,6 +84,9 @@ class MulticlassLR():
 
 
     def anp_xentropy_loss(self, X, y, theta):
+        '''
+        Function for crossentropy loss
+        '''
         hyp = self.anp_hypothesis(X, theta)
 
         indic = self.indicator(y)
@@ -76,6 +101,14 @@ class MulticlassLR():
         return loss
 
     def fit(self, X, y, batch_size, n_iter=100, lr=0.01):
+        '''
+        Function to fit using manually calculated gradients
+        X: input samples dataframe
+        y: target labels series
+        batch_size: batch size
+        n_iter: number of iterations
+        lr: learning rate
+        '''
         n, m = X.shape
 
         n,m = X.shape
@@ -113,11 +146,14 @@ class MulticlassLR():
                 self.coef_ = theta
 
     def fit_autograd(self, X, y, batch_size, n_iter=100, lr=0.01):
-        # n, m = X.shape
-
-        # X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
-
-        n, m = X.shape
+        '''
+        Function to fit using manually calculated gradients
+        X: input samples dataframe
+        y: target labels series
+        batch_size: batch size
+        n_iter: number of iterations
+        lr: learning rate
+        '''
 
         n,m = X.shape
         X = np.array(X)
@@ -155,6 +191,10 @@ class MulticlassLR():
         self.coef_ = theta
 
     def predict(self, X):
+        '''
+        Function to predict
+        X: Dataframe having datapoints to predict
+        '''
         # X_new = pd.concat([pd.Series(np.ones(X.shape[0])),X],axis=1)
 
         n,m = X.shape
@@ -174,6 +214,9 @@ class MulticlassLR():
         return np.array(preds)
 
     def plot_loss_history(self):
+        '''
+        Function to plot loss history
+        '''
         plt.plot([10*i for i in range(1, len(self.loss_history)+1)], self.loss_history)
         plt.xlabel("Iterations")
         plt.ylabel("Crossentropy Loss")

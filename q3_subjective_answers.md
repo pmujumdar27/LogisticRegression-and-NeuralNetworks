@@ -1,4 +1,4 @@
-# ES654-2020 Assignment 3
+# ES654-2021 Assignment 3
 
 *Pushkar Mujumdar* - *18110132*
 
@@ -32,7 +32,8 @@ Number of times ith digit was misclassified:
 
 From the above results, we can see that 1, 8 and 9 were the most misclassified digits
 
-From the cumulative confusion matrix, we can see that 8 was often misclassified as 3 which is pretty intuitive. 1 was misclassified as 9 and vice versa is also understandable.
+From the cumulative confusion matrix, we can see that 8 was often misclassified as 3 which is pretty intuitive. 
+1 was misclassified as 9 and vice versa is also understandable.
 ```
 
 - Visualizing digits dataset in 2d after PCA transform

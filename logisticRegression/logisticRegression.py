@@ -14,6 +14,12 @@ class LogisticRegression():
 
     def fit_2class_unreg(self, X, y, batch_size, n_iter=100, lr=0.01):
         '''
+        Function to fit using manually calculated gradients
+        X: input samples dataframe
+        y: target labels series
+        batch_size: batch size
+        n_iter: number of iterations
+        lr: learning rate
         '''
         n,m = X.shape
         X = np.array(X)
@@ -30,10 +36,10 @@ class LogisticRegression():
         curr_lr = lr
 
         for iter in range(1, n_iter+1):
-            # print("Iteration: {}".format(iter), theta)
 
             self.theta_history.append(theta.copy())
 
+            # batched gradient descent
             for batch in range(0, num_samples, batch_size):
                 X_batch = np.array(X[batch:batch+batch_size])
                 y_batch = np.array(y[batch:batch+batch_size]).reshape((len(X_batch), 1))
@@ -45,16 +51,20 @@ class LogisticRegression():
 
                 # update coeffs
                 theta -= (1/curr_sample_size)*curr_lr*np.matmul(X_batch.T, error_batch)
-                # if self.use_bias:
-                #     b -= (1/curr_sample_size)*curr_lr*np.sum(error_batch)
                 
 
         self.coef_ = theta
-        # if self.use_bias:
-        #     self.bias = b
 
 
     def anp_loss(self, X, y, theta, reg_type, lam):
+        '''
+        Function to calculate crossentropy loss
+        X: input samples dataframe
+        y: target labels series
+        theta: weights
+        reg_type: type of regularization (None, L1 or L2)
+        lam: lambda for regularization
+        '''
         y_hat = anp_sigmoid(anp.matmul(X,theta))
         cost = -1 * (anp.dot(y.T, anp.log(y_hat)) + anp.dot((1 - y).T, anp.log(1 - y_hat)))
         if reg_type == 'L1':
@@ -67,18 +77,15 @@ class LogisticRegression():
 
     def fit_2class_autograd(self, X, y, batch_size, n_iter=100, lr=0.01, reg_type=None, lam=0):
         '''
-        Function to train model using gradient descent with Autograd to compute the gradients.
-        Autograd reference: https://github.com/HIPS/autograd
-
-        :param X: pd.DataFrame with rows as samples and columns as features (shape: (n_samples, n_features))
-        :param y: pd.Series with rows corresponding to output (shape: (n_samples,))
-        :param batch_size: int specifying the  batch size. Batch size can only be between 1 and number of samples in data.
-        :param n_iter: number of iterations (default: 100)
-        :param lr: learning rate (default: 0.01)
-
-        :return None
+        Function to fit using manually calculated gradients
+        X: input samples dataframe
+        y: target labels series
+        batch_size: batch size
+        n_iter: number of iterations
+        lr: learning rate
+        reg_type: type of regularization (None, L1 or L2)
+        lam: lambda for regularization
         '''
-
         n, m = X.shape
         X = np.array(X)
         y = np.array(y)
@@ -132,6 +139,7 @@ class LogisticRegression():
 
     def plot_2d_boundary(self, X, y):
         '''
+        Function to plot 2d decision boundary
         Inputs:
         X: pd.DataFrame with rows as samples and columns as features [Give only 2 features (columns)]
         y: pd.Series with rows corresponding to output variable
