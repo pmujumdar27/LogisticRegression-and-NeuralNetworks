@@ -58,8 +58,8 @@ for train_index, test_index in skf.split(X, y):
 
     MLR = MulticlassLR(num_classes)
 
-    # MLR.fit(X_train, y_train, 10, n_iter=50, lr=0.1)
-    MLR.fit_autograd(X_train, y_train, 10, n_iter=10, lr=0.1)
+    MLR.fit(X_train, y_train, 10, n_iter=50, lr=0.1)
+    # MLR.fit_autograd(X_train, y_train, 10, n_iter=50, lr=0.1)
 
     y_hat = MLR.predict(X_test)
 

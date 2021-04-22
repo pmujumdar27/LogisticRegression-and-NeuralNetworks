@@ -1,11 +1,11 @@
-import numpy as np
+# import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from .utils import *
 
-import autograd.numpy as anp
+import autograd.numpy as np
 from autograd import grad
 
 class MulticlassLR():
@@ -28,8 +28,8 @@ class MulticlassLR():
         return tmp
 
     def anp_hypothesis(self, X, theta):
-        hyp = anp.exp(anp.dot(np.array(X), theta))
-        den = anp.sum(hyp, axis=1).reshape(-1,1)
+        hyp = np.exp(np.dot(np.array(X), theta))
+        den = np.sum(hyp, axis=1).reshape(-1,1)
         return hyp/den
 
     def hypothesis(self, X, theta, single=False):
@@ -64,14 +64,14 @@ class MulticlassLR():
     def anp_xentropy_loss(self, X, y, theta):
         hyp = self.anp_hypothesis(X, theta)
 
-        # indic = self.indicator(y)
+        indic = self.indicator(y)
 
-        # loss = -np.sum(indic * np.log(hyp))
+        loss = -np.sum(indic * np.log(hyp))
 
-        loss = 0
-        for i in range(X.shape[0]):
-            for j in range(self.num_classes):
-                loss -= (y[i]==j)*anp.log(hyp[i][j])
+        # loss = 0
+        # for i in range(X.shape[0]):
+        #     for j in range(self.num_classes):
+        #         loss -= (y[i]==j)*np.log(hyp[i][j])
 
         return loss
 
@@ -129,7 +129,7 @@ class MulticlassLR():
         
         num_features = X.shape[1]
 
-        self.coef_ = anp.zeros((m+1,self.num_classes))
+        self.coef_ = np.zeros((m+1,self.num_classes))
         theta = self.coef_
         curr_lr = lr
 
