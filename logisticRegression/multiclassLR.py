@@ -48,16 +48,26 @@ class MulticlassLR():
     def xentropy_loss(self, X, y, theta):
 
         hyp = self.hypothesis(X, theta)
-        loss = 0
-        for i in range(X.shape[0]):
-            for j in range(self.num_classes):
-                loss -= (y[i]==j)*np.log(hyp[i][j])
+
+        indic = self.indicator(y)
+
+        loss = -np.sum(indic * np.log(hyp))
+
+        # loss = 0
+        # for i in range(X.shape[0]):
+        #     for j in range(self.num_classes):
+        #         loss -= (y[i]==j)*np.log(hyp[i][j])
 
         return loss
 
 
     def anp_xentropy_loss(self, X, y, theta):
         hyp = self.anp_hypothesis(X, theta)
+
+        # indic = self.indicator(y)
+
+        # loss = -np.sum(indic * np.log(hyp))
+
         loss = 0
         for i in range(X.shape[0]):
             for j in range(self.num_classes):
@@ -67,10 +77,6 @@ class MulticlassLR():
 
     def fit(self, X, y, batch_size, n_iter=100, lr=0.01):
         n, m = X.shape
-
-        # X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
-
-        # self.coef_ = np.zeros((m+1,self.num_classes))
 
         n,m = X.shape
         X = np.array(X)
@@ -107,9 +113,21 @@ class MulticlassLR():
                 self.coef_ = theta
 
     def fit_autograd(self, X, y, batch_size, n_iter=100, lr=0.01):
+        # n, m = X.shape
+
+        # X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
+
         n, m = X.shape
 
-        X_new = pd.concat([pd.Series(np.ones(n)),X],axis=1)
+        n,m = X.shape
+        X = np.array(X)
+        y = np.array(y)
+        o = np.ones(n)
+        X = np.concatenate((o.reshape(-1,1), X), axis=1)
+
+        num_samples = X.shape[0]
+        
+        num_features = X.shape[1]
 
         self.coef_ = anp.zeros((m+1,self.num_classes))
         theta = self.coef_
@@ -120,14 +138,14 @@ class MulticlassLR():
         for iter in tqdm(range(1, n_iter+1)):
 
             if iter%10 == 0:
-                loss = self.xentropy_loss(np.array(X_new), np.array(y), theta)
+                loss = self.xentropy_loss(np.array(X), np.array(y), theta)
                 print("Iteration: {}, Loss: {}".format(iter, loss))
                 self.loss_history.append(loss)
                 self.theta_history.append(theta.copy())
 
             for batch in range(0, n, batch_size):
-                X_batch = np.array(X_new.iloc[batch:batch+batch_size])
-                y_batch = np.array(y.iloc[batch:batch+batch_size]).reshape((len(X_batch), 1))
+                X_batch = np.array(X[batch:batch+batch_size])
+                y_batch = np.array(y[batch:batch+batch_size]).reshape((len(X_batch), 1))
 
                 curr_sample_size = len(X_batch)
 
